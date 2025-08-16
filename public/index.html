@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Private UNO</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <h1>Private UNO</h1>
+    <div class="form">
+      <label>Room Code</label>
+      <input type="text" id="roomInput" placeholder="Enter Room Code" />
+      <label>Your Name</label>
+      <input type="text" id="nameInput" placeholder="Enter Your Name" />
+      <button id="joinBtn">Create / Join</button>
+    </div>
+    <div id="gameArea" style="display:none;">
+      <h2 id="roomDisplay"></h2>
+      <h3 id="playerNameDisplay"></h3>
+      <div id="cards"></div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
