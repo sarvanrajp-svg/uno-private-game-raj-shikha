@@ -10,7 +10,7 @@ button{padding:12px 14px;border-radius:10px;border:1px solid #2a3040;background:
 button:disabled{opacity:.6}
 button.ghost{background:transparent}
 .hint{opacity:.7;margin-top:8px}
-.hidden{display:none}
+.hidden{display:none !important} /* strong override */
 .toprow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .pile{background:#171a21;border:1px solid #252a36;border-radius:12px;padding:12px}
 .pile-title,.hand-title{font-weight:700;margin-bottom:8px}
@@ -30,6 +30,7 @@ button.ghost{background:transparent}
 .card-btn .c{font-size:12px;opacity:.8}
 .card-btn.wild{background:linear-gradient(45deg,#d33,#dd3,#3d3,#39f)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}
+.modal.hidden{display:none !important} /* ensure hidden wins */
 .modal-content{background:#0f1218;border:1px solid #2a3040;border-radius:12px;padding:16px}
 .color-buttons{display:flex;gap:10px;margin-top:8px}
 .color-btn{width:48px;height:48px;border-radius:12px;border:2px solid #2a3040}

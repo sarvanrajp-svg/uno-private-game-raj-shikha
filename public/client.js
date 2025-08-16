@@ -16,70 +16,24 @@
   const colorPicker = document.getElementById('colorPicker');
   const colorButtons = colorPicker.querySelectorAll('.color-btn');
 
-  // --- Safety: force-hide color picker on load/lobby ---
-  function forceHideColorPicker() {
-    if (colorPicker) colorPicker.classList.add('hidden');
-    pendingWildCardId = null;
-  }
-  forceHideColorPicker();
-  const lobbyObs = new MutationObserver(() => {
-    if (!joinSection.classList.contains('hidden')) forceHideColorPicker();
-  });
-  lobbyObs.observe(document.body, { attributes: true, childList: true, subtree: true });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') forceHideColorPicker(); });
-  colorPicker.addEventListener('click', (e) => { if (e.target === colorPicker) forceHideColorPicker(); });
-
-  // Buttons under meta
-  let extraBar = document.getElementById('extraBar');
-  if (!extraBar) {
-    extraBar = document.createElement('div');
-    extraBar.id = 'extraBar';
-    extraBar.style.display = 'flex';
-    extraBar.style.gap = '8px';
-    extraBar.style.marginTop = '6px';
-    const meta = document.querySelector('.meta .actions');
-    meta && meta.after(extraBar);
-  }
-  const unoBtn = document.createElement('button'); unoBtn.textContent = 'UNO!';
-  const calloutBtn = document.createElement('button'); calloutBtn.textContent = 'Callout';
-  const challengeBtn = document.createElement('button'); challengeBtn.textContent = 'Challenge +4';
-  const nextRoundBtn = document.createElement('button'); nextRoundBtn.textContent = 'Next Round'; nextRoundBtn.classList.add('ghost');
-  extraBar.append(unoBtn, calloutBtn, challengeBtn, nextRoundBtn);
+  // Strong force-hide on load
+  colorPicker.classList.add('hidden');
+  colorPicker.style.display = 'none';
 
   let ws = null;
   let state = null;
   let pendingWildCardId = null;
 
-  function randomRoom() {
-    const syll = ['ra','ka','shi','ka','ai','ka','to','fu','mi','na','yo','ri','za','go'];
-    let s = '';
-    for (let i=0;i<3;i++) s += syll[Math.floor(Math.random()*syll.length)];
-    return s + Math.floor(Math.random()*100);
-  }
-
-  if (!roomInput.value) roomInput.value = (localStorage.getItem('uno_room') || randomRoom());
-  if (!nameInput.value) nameInput.value = (localStorage.getItem('uno_name') || 'Player');
-
-  function connect() {
+  function connect(cb) {
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     const url = `${proto}://${location.host}`;
     ws = new WebSocket(url);
-
-    ws.addEventListener('open', () => {
-      statusEl.textContent = 'Connected';
-      // do not auto-join; wait for button
-    });
-    ws.addEventListener('close', () => {
-      statusEl.textContent = 'Disconnected';
-    });
+    ws.addEventListener('open', () => { statusEl.textContent = 'Connected'; cb && cb(); });
+    ws.addEventListener('close', () => { statusEl.textContent = 'Disconnected'; });
     ws.addEventListener('message', (e) => {
       const msg = JSON.parse(e.data);
-      if (msg.type === 'state') {
-        state = msg.data;
-        render();
-      } else if (msg.type === 'error') {
-        alert(msg.message || 'Error');
-      }
+      if (msg.type === 'state') { state = msg.data; render(); }
+      else if (msg.type === 'error') { alert(msg.message || 'Error'); }
     });
   }
 
@@ -92,11 +46,18 @@
     ws.send(JSON.stringify({ type: 'join', roomId: room, name }));
     joinSection.classList.add('hidden');
     gameSection.classList.remove('hidden');
+    // Always hide color dialog on lobby -> game transition
+    colorPicker.classList.add('hidden');
+    colorPicker.style.display = 'none';
   }
+
+  joinBtn.addEventListener('click', () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) connect(join);
+    else join();
+  });
 
   function render() {
     if (!state) return;
-
     lastActionEl.textContent = state.lastAction || '';
     currentColorEl.textContent = state.currentColor || '—';
 
@@ -126,14 +87,6 @@
 
     drawBtn.disabled = !(yourTurn && !state.winner && !state.matchWinner && playableIds.size === 0);
     resetBtn.disabled = false;
-    unoBtn.disabled = !(state.mustPressUno);
-    calloutBtn.disabled = !(state.canCallout);
-    challengeBtn.disabled = !(state.canChallenge);
-    nextRoundBtn.disabled = !(state.winner && !state.matchWinner);
-
-    if (state.matchWinner) statusEl.textContent = `🏆 Match: ${state.players.find(p=>p.id===state.matchWinner)?.name || 'Player'} won`;
-    else if (state.winner) statusEl.textContent = `🎉 Round: ${state.players.find(p=>p.id===state.winner)?.name || 'Player'} won`;
-    else statusEl.textContent = state.yourTurn ? 'Your turn' : 'Their turn';
   }
 
   function renderCard(card, asButton) {
@@ -159,14 +112,13 @@
   function onPlay(card) {
     if (card.color === 'W') {
       pendingWildCardId = card.id;
-      openColorPicker();
+      colorPicker.classList.remove('hidden');
+      colorPicker.style.display = 'flex';
     } else {
       ws.send(JSON.stringify({ type: 'play', cardId: card.id }));
     }
   }
 
-  function openColorPicker() { colorPicker.classList.remove('hidden'); }
-  function closeColorPicker() { colorPicker.classList.add('hidden'); }
   colorButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const chosen = btn.getAttribute('data-color');
@@ -174,22 +126,14 @@
         ws.send(JSON.stringify({ type: 'play', cardId: pendingWildCardId, chosenColor: chosen }));
         pendingWildCardId = null;
       }
-      closeColorPicker();
+      colorPicker.classList.add('hidden');
+      colorPicker.style.display = 'none';
     });
   });
 
   drawBtn.addEventListener('click', () => ws.send(JSON.stringify({ type: 'draw' })));
   resetBtn.addEventListener('click', () => ws.send(JSON.stringify({ type: 'reset' })));
-  unoBtn.addEventListener('click', () => ws.send(JSON.stringify({ type: 'uno' })));
-  calloutBtn.addEventListener('click', () => ws.send(JSON.stringify({ type: 'callout' })));
-  challengeBtn.addEventListener('click', () => ws.send(JSON.stringify({ type: 'challenge' })));
-  nextRoundBtn.addEventListener('click', () => ws.send(JSON.stringify({ type: 'next-round' })));
 
-  joinBtn.addEventListener('click', () => {
-    if (!ws || ws.readyState !== WebSocket.OPEN) connect();
-    setTimeout(join, 100); // slight delay to ensure socket open
-  });
-
-  // Autoconnect
+  // Connect on load (won't auto-join)
   connect();
 })();
