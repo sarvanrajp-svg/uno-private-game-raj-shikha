@@ -1,0 +1,44 @@
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0f1115;color:#e7e9ee}
+.app{max-width:960px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+h1{font-size:22px;margin:0}
+#status{font-size:14px;opacity:.85}
+.card{background:#171a21;border:1px solid #252a36;border-radius:12px;padding:16px}
+label{display:block;font-size:14px;margin:8px 0 4px;opacity:.9}
+input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #2a3040;background:#0f1218;color:#e7e9ee}
+button{padding:12px 14px;border-radius:10px;border:1px solid #2a3040;background:#222838;color:#e7e9ee;font-weight:600}
+button:disabled{opacity:.6}
+button.ghost{background:transparent}
+.hint{opacity:.7;margin-top:8px}
+.hidden{display:none}
+.toprow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pile{background:#171a21;border:1px solid #252a36;border-radius:12px;padding:12px}
+.pile-title,.hand-title{font-weight:700;margin-bottom:8px}
+.card-slot{height:120px;border-radius:10px;border:2px dashed #2a3040;display:flex;align-items:center;justify-content:center;font-weight:700}
+.color-indicator{margin-top:8px;opacity:.9}
+.meta{background:#171a21;border:1px solid #252a36;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.actions{display:flex;gap:8px}
+#players{display:flex;gap:8px;flex-wrap:wrap}
+.player-pill{padding:6px 10px;border-radius:999px;background:#222838;border:1px solid #2a3040;font-size:13px}
+.player-pill.you{outline:2px solid #4c8dff}
+.last-action{opacity:.9;min-height:20px}
+.hand{margin-top:12px;background:#171a21;border:1px solid #252a36;border-radius:12px;padding:12px}
+.hand-cards{display:flex;flex-wrap:wrap;gap:8px}
+.card-btn{min-width:70px;padding:10px;border-radius:10px;border:2px solid #2a3040;background:#0f1218;color:#e7e9ee}
+.card-btn.playable{outline:2px solid #4c8dff}
+.card-btn .v{font-weight:800}
+.card-btn .c{font-size:12px;opacity:.8}
+.card-btn.wild{background:linear-gradient(45deg,#d33,#dd3,#3d3,#39f)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}
+.modal-content{background:#0f1218;border:1px solid #2a3040;border-radius:12px;padding:16px}
+.color-buttons{display:flex;gap:10px;margin-top:8px}
+.color-btn{width:48px;height:48px;border-radius:12px;border:2px solid #2a3040}
+.color-btn.red{background:#c0392b}
+.color-btn.yellow{background:#f1c40f}
+.color-btn.green{background:#27ae60}
+.color-btn.blue{background:#2980b9}
+@media (max-width:720px){
+  .toprow{grid-template-columns:1fr}
+  .card-slot{height:100px}
+  .card-btn{min-width:43%;flex:1}
+}
